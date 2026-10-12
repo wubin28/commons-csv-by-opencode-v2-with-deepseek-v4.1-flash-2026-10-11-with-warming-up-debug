@@ -1,0 +1,5 @@
+out/
+__pycache__/
+faults/patches/*.patch
+faults/ids.txt
+FAULT-INJECTION-GUIDE.md

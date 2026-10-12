@@ -628,10 +628,10 @@ public final class CSVParser implements Iterable<CSVRecord>, Closeable {
     private Headers createHeaders() throws IOException {
         Map<String, Integer> headerMap = null;
         List<String> headerNames = null;
+        String[] headerRecord = null;
         final String[] formatHeader = format.getHeader();
         if (formatHeader != null) {
             headerMap = createEmptyHeaderMap();
-            String[] headerRecord = null;
             if (formatHeader.length == 0) {
                 // read the header from the first line of the file
                 final CSVRecord nextRecord = nextRecord();
@@ -678,8 +678,41 @@ public final class CSVParser implements Iterable<CSVRecord>, Closeable {
                 }
             }
         }
+        validateRequiredHeaders(headerMap, headerRecord);
         // Make header names Collection immutable
         return new Headers(headerMap, headerNames == null ? Collections.emptyList() : Collections.unmodifiableList(headerNames));
+    }
+
+    /**
+     * Verifies that the header contains every name required by the format.
+     *
+     * @param headerMap    the name-to-index map, {@code null} when the format has no header.
+     * @param headerRecord the header values, {@code null} when the header could not be read.
+     * @throws IllegalArgumentException When a required name is absent, or when no header is available to verify.
+     */
+    private void validateRequiredHeaders(final Map<String, Integer> headerMap, final String[] headerRecord) {
+        final List<String> required = new ArrayList<>();
+        for (final String requiredHeader : format.getRequiredHeaders()) {
+            if (!required.contains(requiredHeader)) {
+                required.add(requiredHeader);
+            }
+        }
+        if (required.isEmpty()) {
+            return;
+        }
+        if (headerMap == null) {
+            throw new IllegalArgumentException("Required name(s) " + required + " cannot be verified because the format has no header");
+        }
+        final List<String> missing = new ArrayList<>();
+        for (final String name : required) {
+            if (!headerMap.containsKey(name)) {
+                missing.add(name);
+            }
+        }
+        if (!missing.isEmpty()) {
+            throw new IllegalArgumentException("The header is missing required name(s): " + missing + " in "
+                    + Arrays.toString(headerRecord == null ? Constants.EMPTY_STRING_ARRAY : headerRecord));
+        }
     }
 
     /**

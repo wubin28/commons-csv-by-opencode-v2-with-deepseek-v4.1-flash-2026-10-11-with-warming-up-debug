@@ -197,6 +197,8 @@
               <inputExclude>src/test/resources/org/apache/commons/csv/CSV-290/psql.tsv</inputExclude>
               <!-- Approved-scenarios fixtures are markdown test data / review material, not licensable source. -->
               <inputExclude>src/test/resources/org/apache/commons/csv/approved/**</inputExclude>
+              <!-- One-off fault-injection tooling and its generated logs/reports, not part of the distributed sources. -->
+              <inputExclude>fault-injection/**</inputExclude>
             </inputExcludes>
           </configuration>
         </plugin>
